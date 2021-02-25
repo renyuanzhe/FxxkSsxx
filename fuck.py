@@ -26,7 +26,7 @@ mode_id_list = [
 mode_id = None
 random_mode_enabled = True
 inform_enabled = False
-auto_refresh_token_enabled = True
+auto_refresh_token_enabled = False
 expire_time = -1
 
 
