@@ -1,7 +1,3 @@
-#!/usr/bin/python3
-
-# -*- coding: utf-8 -*-
-
 import requests
 import json
 import time
@@ -14,7 +10,9 @@ import sys
 import traceback
 import getopt
 import base64
-
+requests.adapters.DEFAULT_RETRIES = 15
+s = requests.session()
+s.keep_alive = False
 VERSION_NAME = "FxxkSsxx 1.4"
 
 answer_dictionary = {}
@@ -28,7 +26,7 @@ mode_id_list = [
 mode_id = None
 random_mode_enabled = True
 inform_enabled = False
-auto_refresh_token_enabled = False
+auto_refresh_token_enabled = True
 expire_time = -1
 
 
@@ -318,8 +316,9 @@ def Start(token):
 
     ReadAnswerFromFile()
 
-    try:
-        while True:
+
+    while True:
+        try:
             if random_mode_enabled:
                 mode = mode_id_list[random.randrange(0, 4)]
                 mode_id = mode["id"]
@@ -363,25 +362,22 @@ def Start(token):
                     "token已更新至 " + time.asctime(time.localtime(expire_time)))
                 time.sleep(5)
 
-    except MyError as err:
-        tag = "[{}] ".format(time.asctime(time.localtime(time.time())))
+        except MyError as err:
+            tag = "[{}] ".format(time.asctime(time.localtime(time.time())))
 
-        if err.code == 1001 or err.code == 1002:
-            print(tag, "登录无效，通知重新登录")
-            SendNotification("请重新登录（代码：{}）".format(err.code))
-        elif err.code == 1005:
-            print(tag, "当前token已退出登录，请重新获取")
-        else:
-            msg = "已停止，原因：" + str(err)
-            print(tag, msg)
-            SendNotification(msg)
-    except Exception as err:
-        tag = "[{}] ".format(time.asctime(time.localtime(time.time())))
-        print(tag, traceback.format_exc())
-    finally:
-        SaveAnswerToFile()
-        SendNotification("awsl")   # 程序退出时发送通知
-        Pause()
+            if err.code == 1001 or err.code == 1002:
+                print(tag, "登录无效，通知重新登录")
+                SendNotification("请重新登录（代码：{}）".format(err.code))
+            elif err.code == 1005:
+                print(tag, "当前token已退出登录，请重新获取")
+            else:
+                msg = "已停止，原因：" + str(err)
+                print(tag, msg)
+                SendNotification(msg)
+        except Exception as err:
+            tag = "[{}] ".format(time.asctime(time.localtime(time.time())))
+            print(tag, traceback.format_exc())
+
 
 
 def PrintHelp():
